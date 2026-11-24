@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluate,validatePolicy} from '../src/policy.mjs';
+import {spawnSync} from 'node:child_process';
+const p={schemaVersion:1,tools:{read:'low',write:'high',erase:'critical'},rules:[{id:'r',role:'staff',tool:'read',effect:'allow'},{id:'w',role:'staff',tool:'write',effect:'allow'},{id:'e',role:'staff',tool:'erase',effect:'allow'}]};
+const go=(tool,policy=p,role='staff')=>evaluate(policy,{role},{tool});
+test('explicit allow',()=>assert.equal(go('read').decision,'allow'));
+test('unknown tool and role denied',()=>{assert.equal(go('other').decision,'deny');assert.equal(go('read',p,'guest').decision,'deny');});
+test('trusted risk floors',()=>{assert.equal(go('write').decision,'require-review');assert.equal(go('erase').decision,'deny');});
+test('deny precedence independent of order',()=>{const d={id:'d',role:'staff',tool:'read',effect:'deny'};for(const rules of [[d,...p.rules],[...p.rules,d]])assert.equal(go('read',{...p,rules}).decision,'deny');});
+test('review overrides allow',()=>assert.equal(go('read',{...p,rules:[...p.rules,{id:'v',role:'staff',tool:'read',effect:'require-review'}]}).decision,'require-review'));
+test('malformed policy fails closed',()=>{for(const q of [null,{}, {...p,schemaVersion:2},{...p,rules:[...p.rules,p.rules[0]]},{...p,tools:{...p.tools,read:'bogus'}},{...p,extra:true}]){assert.equal(validatePolicy(q),false);assert.equal(go('read',q).decision,'deny');}});
+test('untrusted risk and role injection denied',()=>{assert.equal(evaluate(p,{role:'staff'},{tool:'write',risk:'low'}).decision,'deny');assert.equal(evaluate(p,{role:'guest'},{tool:'read',role:'staff'}).decision,'deny');});
+test('prototype names not implicitly granted',()=>assert.equal(go('constructor').decision,'deny'));
+test('stable evidence',()=>assert.deepEqual(go('read'),go('read')));
+test('accessor input denied without invoking getter',()=>{let invoked=false;const r={get tool(){invoked=true;return 'read';}};assert.equal(evaluate(p,{role:'staff'},r).decision,'deny');assert.equal(invoked,false);});
+test('CLI synthetic fixture',()=>{const r=spawnSync(process.execPath,['src/cli.mjs','examples/policy.json','examples/request.json'],{encoding:'utf8'});assert.equal(r.status,0);assert.equal(JSON.parse(r.stdout).decision,'allow');});
+test('CLI missing input or non-regular file',()=>{assert.equal(spawnSync(process.execPath,['src/cli.mjs']).status,1);assert.equal(spawnSync(process.execPath,['src/cli.mjs','.','examples/request.json']).status,1);});
