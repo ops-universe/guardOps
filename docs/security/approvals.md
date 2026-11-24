@@ -1,0 +1,5 @@
+# Approval lifecycle
+
+The trusted host creates a ledger with a policy snapshot, argument schemas and authenticated reviewer allowlist. A request requiring review receives an expiring random ID. A separate authorized reviewer must approve; self-review and unknown reviewers are denied. Consumption binds the full principal, tool arguments and policy/schema revision using canonical SHA-256. The synchronous in-memory transition prevents replay within one ledger instance. Expiry is exclusive; clock rollback denies. Restart invalidates outstanding approvals. There is no distributed or durable replay protection; do not share approval IDs across processes or treat them as bearer authorization. The host must authenticate reviewer and principal IDs, supply a trusted clock, present the exact request to the human and enforce execution of only the consumed payload. Never expose review directly to a model.
+
+Run `node src/approval-demo.mjs` for a synthetic interactive terminal demonstration. No real refund or authenticated review occurs.
