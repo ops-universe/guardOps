@@ -1,0 +1,26 @@
+{
+  "lookup": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "maxLength": 16
+      }
+    }
+  },
+  "refund": {
+    "type": "object",
+    "required": [
+      "id"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "maxLength": 16
+      }
+    }
+  }
+}

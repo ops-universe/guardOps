@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "tools": {
+    "lookup": "low",
+    "refund": "high"
+  },
+  "rules": [
+    {
+      "id": "lookup",
+      "role": "support",
+      "tool": "lookup",
+      "effect": "allow"
+    },
+    {
+      "id": "refund",
+      "role": "support",
+      "tool": "refund",
+      "effect": "allow"
+    }
+  ]
+}

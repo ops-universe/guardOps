@@ -1,5 +1,5 @@
 # Resume checkpoint
 
-Last verified main: 5737374dfe1040e4789fe3722f70d86cc824e859
+Last verified main: c7208290957c92e3d22ded329f1dfdfc2a1cd28f
 
-Phase 4 branch: feat/approval-workflows. Verify PR exact-head CI, review requirements and merge. Next: local redacted audit evidence and simulation CLI regression fixtures. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build. Interactive demo: node src/approval-demo.mjs.
+Phase 5 branch: feat/audit-simulation. Verify exact-head CI and required reviews before merge. Next: dashboard with real synthetic policy simulation, evidence viewer, permission matrix and review demo. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build.
