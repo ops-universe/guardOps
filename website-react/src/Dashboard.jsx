@@ -1,0 +1,17 @@
+import React,{useState} from 'react';
+import policyFixture from '../../examples/simulation/policy.json';
+import schemas from '../../examples/simulation/schemas.json';
+import {parsePolicy,simulateRequest,permissionMatrix,reviewDemo} from './dashboard-model.mjs';
+const initial=JSON.stringify(policyFixture,null,2);
+export default function Dashboard(){
+ const [source,setSource]=useState(initial),[role,setRole]=useState('support'),[tool,setTool]=useState('lookup'),[args,setArgs]=useState('{"id":"SKU1"}'),[evidence,setEvidence]=useState(null),[queue,setQueue]=useState(null);
+ const policy=parsePolicy(source),matrix=permissionMatrix(policy);
+ function invalidate(){setEvidence(null);setQueue(null);}
+ function run(e){e.preventDefault();const result=simulateRequest(policy,schemas,role,tool,args);setEvidence(result);setQueue(result.decision==='require-review'?{status:'pending',role,tool}:null);}
+ return <section id="dashboard" className="dashboard" aria-label="Policy dashboard">
+ <h2>Policy workbench</h2><p>Offline synthetic simulation. No tool execution, authenticated review or production authorization. Use synthetic data only.</p>
+ <div className="dashboard-grid"><div className="panel"><h3>Policy editor</h3><label htmlFor="policy">Version 1 policy JSON</label><textarea id="policy" rows={16} maxLength={65536} value={source} onChange={e=>{setSource(e.target.value);invalidate();}}/><p role="status">{policy?'Valid policy':'Invalid policy — fails closed'}</p><button type="button" onClick={()=>{setSource(initial);invalidate();}}>Reset fixture</button></div>
+ <form className="panel" onSubmit={run}><h3>Policy simulator</h3><label htmlFor="role">Synthetic role</label><input id="role" maxLength={80} value={role} onChange={e=>{setRole(e.target.value);invalidate();}}/><label htmlFor="tool">Tool</label><input id="tool" maxLength={80} value={tool} onChange={e=>{setTool(e.target.value);invalidate();}}/><label htmlFor="args">Arguments JSON</label><textarea id="args" rows={5} maxLength={65536} value={args} onChange={e=>{setArgs(e.target.value);invalidate();}}/><p>Fixed synthetic argument schemas: lookup and refund, each requiring an id string.</p><button type="submit">Evaluate decision</button><h3>Decision evidence</h3><pre role="status" aria-live="polite">{evidence?JSON.stringify(evidence,null,2):'Run a simulation to inspect evidence.'}</pre></form></div>
+ <div className="panel"><h3>Permission matrix</h3><p>Policy-only view, before argument validation. Up to 30 roles and 30 tools.</p><div className="table-wrap"><table><caption>Role and tool decisions</caption><thead><tr><th scope="col">Role</th><th scope="col">Tool</th><th scope="col">Decision</th><th scope="col">Risk</th></tr></thead><tbody>{matrix.map(r=><tr key={r.role+':'+r.tool}><td>{r.role}</td><td>{r.tool}</td><td>{r.decision}</td><td>{r.risk}</td></tr>)}</tbody></table></div>{!matrix.length&&<p>No valid role/tool combinations.</p>}</div>
+ <div className="panel"><h3>Approval queue demonstration</h3><p>This is a UI-only demonstration of review states, not the server-side approval ledger. It never grants execution permission.</p>{queue?<><p role="status">{queue.role} / {queue.tool}: {queue.status}</p><button disabled={queue.status!=='pending'} onClick={()=>setQueue(q=>reviewDemo(q,'approve'))}>Approve demo</button> <button disabled={queue.status!=='pending'} onClick={()=>setQueue(q=>reviewDemo(q,'reject'))}>Reject demo</button></>:<p>No pending review. Simulate a refund as support.</p>}</div></section>;
+}

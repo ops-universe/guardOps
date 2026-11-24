@@ -1,5 +1,5 @@
 # Resume checkpoint
 
-Last verified main: c7208290957c92e3d22ded329f1dfdfc2a1cd28f
+Last verified main: b5d25962388c00d86afde77d0b2ae2f0aced6ff8
 
-Phase 5 branch: feat/audit-simulation. Verify exact-head CI and required reviews before merge. Next: dashboard with real synthetic policy simulation, evidence viewer, permission matrix and review demo. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build.
+Phase 6 branch: feat/policy-dashboard. Verify exact-head CI and required reviews, merge if eligible. Next: enterprise integration examples with enforced execution boundary and security tests. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build. Browser interaction checks remain to be verified.
