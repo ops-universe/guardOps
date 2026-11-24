@@ -1,3 +1,3 @@
 # Implementation status
 
-PR #1 merged, core tests and website build/audits passed at PR head 841c89b276d84a55be19a6e8fddc2db92de7e552 (Actions run 45455804051). Phase 3 code proposed; CI pending. No production readiness claim.
+PR #1 and PR #2 merged. PR #2 exact head 4a7942c61917443e045d5ec19c691683d1c5e9d2: four successful test/website checks verified. Phase 4 approval lifecycle proposed; CI pending. Ledger is in-memory, not distributed or persistent. No production readiness claim.
