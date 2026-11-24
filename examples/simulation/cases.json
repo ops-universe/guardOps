@@ -1,0 +1,80 @@
+[
+  {
+    "id": "allowed",
+    "principal": {
+      "role": "support"
+    },
+    "request": {
+      "tool": "lookup",
+      "args": {
+        "id": "SKU1"
+      }
+    },
+    "expected": "allow"
+  },
+  {
+    "id": "approval",
+    "principal": {
+      "role": "support"
+    },
+    "request": {
+      "tool": "refund",
+      "args": {
+        "id": "SKU1"
+      }
+    },
+    "expected": "require-review"
+  },
+  {
+    "id": "role-spoof",
+    "principal": {
+      "role": "guest"
+    },
+    "request": {
+      "tool": "lookup",
+      "args": {
+        "id": "SKU1"
+      }
+    },
+    "expected": "deny"
+  },
+  {
+    "id": "argument-escalation",
+    "principal": {
+      "role": "support"
+    },
+    "request": {
+      "tool": "lookup",
+      "args": {
+        "id": "SKU1",
+        "admin": true
+      }
+    },
+    "expected": "deny"
+  },
+  {
+    "id": "unknown-tool",
+    "principal": {
+      "role": "support"
+    },
+    "request": {
+      "tool": "delete",
+      "args": {}
+    },
+    "expected": "deny"
+  },
+  {
+    "id": "risk-injection",
+    "principal": {
+      "role": "support"
+    },
+    "request": {
+      "tool": "refund",
+      "args": {
+        "id": "SKU1"
+      },
+      "risk": "low"
+    },
+    "expected": "deny"
+  }
+]

@@ -1,0 +1,11 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {spawnSync} from 'node:child_process';import {simulate,compareReports,createAuditBuffer,verifyAudit} from '../src/simulation.mjs';
+const load=n=>JSON.parse(readFileSync(new URL('../examples/simulation/'+n+'.json',import.meta.url),'utf8'));
+const p=load('policy'),s=load('schemas'),c=load('cases');
+test('synthetic fixtures and deterministic report',()=>{const r=simulate(p,s,c);assert.equal(r.failed,0);assert.equal(r.total,6);assert.deepEqual(r,simulate(p,s,c));assert.equal(JSON.stringify(r).includes('SKU1'),false);});
+test('regression detects changed authorization and removed cases',()=>{const r=simulate(p,s,c);const q={...p,rules:[]};const next=simulate(q,s,c.slice(1));const d=compareReports(r,next);assert.equal(d.pass,false);assert.deepEqual(d.removed,['allowed']);assert.ok(d.regressions.includes('approval'));});
+test('identical reports pass',()=>{const r=simulate(p,s,c);assert.equal(compareReports(r,r).pass,true);});
+test('invalid and duplicate cases rejected',()=>{assert.throws(()=>simulate(p,s,[c[0],c[0]]));assert.throws(()=>simulate(p,s,[{...c[0],expected:'maybe'}]));});
+test('invalid reports rejected',()=>assert.throws(()=>compareReports({},{})));
+test('audit records exclude raw payload and verify chain',()=>{const a=createAuditBuffer({clock:()=>1});a.append({decision:'deny',reason:'unknown-tool',payload:'secret'});a.append({decision:'allow',reason:'explicit-allow'});const rows=a.snapshot();assert.equal(JSON.stringify(rows).includes('secret'),false);assert.equal(verifyAudit(rows),true);rows[0].decision='allow';assert.equal(verifyAudit(rows),false);assert.equal(verifyAudit(a.snapshot()),true);});
+test('audit capacity and invalid evidence fail closed',()=>{const a=createAuditBuffer({capacity:1});assert.throws(()=>a.append({decision:'maybe',reason:'x'}));a.append({decision:'deny',reason:'invalid-request'});assert.throws(()=>a.append({decision:'allow',reason:'x'}));});
+test('simulation CLI integration',()=>{const r=spawnSync(process.execPath,['src/simulation-cli.mjs','simulate','examples/simulation/policy.json','examples/simulation/schemas.json','examples/simulation/cases.json'],{encoding:'utf8'});assert.equal(r.status,0);assert.equal(JSON.parse(r.stdout).total,6);});
