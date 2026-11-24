@@ -1,7 +1,5 @@
 # Resume checkpoint
 
-Last verified main: 5275cae0d19ff387d491d53a50dd2603a177deb7
+Last verified main: 652643224168f21b90fef93927def07b04517380
 
-Branch: feat/foundation-policy
-
-Phase 1/2 vertical slice: policy engine and CLI. Verify PR checks, reviews and merge; then add argument validation and guardrail heuristics. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build. CI evidence pending.
+Phase 3: guardrails on feat/guardrails. Verify PR CI and reviews before merging. Next: scope-bound expiring human approvals, replay prevention and tests. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build.
