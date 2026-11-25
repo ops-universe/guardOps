@@ -1,3 +1,5 @@
 # Implementation status
 
-PRs #1–5 merged. PR #5 head 550036549ac5375afa4ee1f7d861be3c18135b84 had four successful exact-head checks. Phase 7 gateway proposed; CI pending. Browser interaction, durable approval storage and audit hardening remain outstanding. No production readiness claim.
+PRs #1–6 merged. PR #6 exact head 71ca288baa118678c7f8f39d75ad979e322381ea: four successful checks verified. Durable governance proposed; CI pending. Browser interaction and release review pending. No production readiness claim.
+
+PR #7 original head failed core CI (run 45516657215: 35 passed, 3 suite failures; core audit skipped). Missing return corrected; new exact-head evidence pending. Public release and promotional work deferred.

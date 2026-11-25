@@ -1,10 +1,12 @@
 import {boundedJson,evaluateGuardedTool,validatePayload} from './guardrails.mjs';
+import {createApprovalLedger} from './approvals.mjs';
 import {evaluate,validatePolicy} from './policy.mjs';
 const token=x=>typeof x==='string'&&/^[A-Za-z0-9_.:-]{1,80}$/.test(x);
 const deny=reason=>({decision:'deny',reason,executed:false});
 export function createGateway({policy,schemas,handlers,outputSchemas,approvalLedger,audit}){
  if(!boundedJson(policy)||!validatePolicy(policy)||!boundedJson(schemas)||!boundedJson(outputSchemas)||!handlers||typeof audit?.append!=='function')throw Error('invalid gateway configuration');
  const p=structuredClone(policy),s=structuredClone(schemas),o=structuredClone(outputSchemas);
+ if(approvalLedger&&approvalLedger.revision!==createApprovalLedger({policy:p,schemas:s,reviewerIds:['revision-check']}).revision)throw Error('approval revision mismatch');
  const registry=new Map(Object.entries(handlers));
  for(const [name,fn] of registry)if(!token(name)||typeof fn!=='function'||!Object.hasOwn(p.tools,name)||!Object.hasOwn(s,name)||!Object.hasOwn(o,name))throw Error('invalid handler registration');
  function log(result){try{audit.append({decision:result.decision,reason:result.reason});return true;}catch{return false;}}
@@ -12,6 +14,7 @@ export function createGateway({policy,schemas,handlers,outputSchemas,approvalLed
   if(!boundedJson(principal)||!token(principal?.id)||!token(principal?.role)||Object.keys(principal).length!==2||!boundedJson(request))return deny('invalid-request');
   // Snapshot JSON data before evaluating or awaiting external code.
   const actor=structuredClone(principal),action=structuredClone(request);
+  if(!action||typeof action!=='object'||Array.isArray(action))return deny('invalid-request');
   let result=evaluateGuardedTool(p,{role:actor.role},action,s,evaluate);
   if(!registry.has(action.tool))result={decision:'deny',reason:'handler-not-registered'};
   if(result.decision==='require-review'){
