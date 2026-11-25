@@ -1,5 +1,3 @@
 # Implementation status
 
-PRs #1–6 merged. PR #6 exact head 71ca288baa118678c7f8f39d75ad979e322381ea: four successful checks verified. Durable governance proposed; CI pending. Browser interaction and release review pending. No production readiness claim.
-
-PR #7 original head failed core CI (run 45516657215: 35 passed, 3 suite failures; core audit skipped). Missing return corrected; new exact-head evidence pending. Public release and promotional work deferred.
+PRs #1–7 merged. PR #7 corrected head 0fe8fa2616aac4b26968c3d3780df9bf9098208a, merge 32b712c89450a2976b34df8919c20cfc6ac10b89, run 45519296346: 56 tests passed, zero failures, core and website audit/build successful. Previous syntax failure resolved. Local authenticated storage does not protect against rollback of an authenticated snapshot or provide distributed transactions. Security acceptance branch adds regression tests; CI pending. Browser acceptance pending. Public release deferred.

@@ -4,12 +4,13 @@ import {createHash} from 'node:crypto';
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const deny=reason=>({decision:'deny',reason});
 export function createPersistentApprovalLedger({directory,key,...config}){
- const probe=createApprovalLedger(config);
+ const fixed={...config,policy:structuredClone(config.policy),schemas:structuredClone(config.schemas),reviewerIds:[...config.reviewerIds]};
+ const probe=createApprovalLedger(fixed);
  const initial={revision:probe.revision,lastTime:-1,records:[]};
  const store=createDurableStore({directory,key,name:'approvals',initial});
  function call(method,args){try{return store.transaction(state=>{
   if(state.revision!==probe.revision||!Array.isArray(state.records)||!Number.isSafeInteger(state.lastTime))throw Error('invalid approval state');
-  const ledger=createApprovalLedger({...config,internalState:state});
+  const ledger=createApprovalLedger({...fixed,internalState:state});
   return ledger[method](...args);
  });}catch{return method==='listPending'?[]:deny('approval-store-unavailable');}}
  return Object.freeze({revision:probe.revision,initialize:()=>store.initialize(),requestApproval:(...a)=>call('requestApproval',a),review:(...a)=>call('review',a),consume:(...a)=>call('consume',a),listPending:()=>call('listPending',[])});
