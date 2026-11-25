@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Record successful post-merge implementation CI (45523320352) and documentation PR #9 CI (45523393322): 60 core tests, four Chromium scenarios, zero reported dependency vulnerabilities. Internal engineering acceptance, not independent security certification or public release.
+
 - Record merged PR #8 engineering acceptance: 60 core tests, four Chromium scenarios including scoped axe checks, and dependency audits passed in run 45522171890. Main verification tracked separately.
 
 - Align Vite preview base with production build; verify served JavaScript MIME and retain browser startup diagnostics without relaxing acceptance assertions.
