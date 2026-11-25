@@ -1,5 +1,5 @@
 # Resume checkpoint
 
-Last verified main: b5d25962388c00d86afde77d0b2ae2f0aced6ff8
+Last verified main: f87b30b599c6dc0cb6b4f426d7800cbfb0070f5f
 
-Phase 6 branch: feat/policy-dashboard. Verify exact-head CI and required reviews, merge if eligible. Next: enterprise integration examples with enforced execution boundary and security tests. Reproduce: npm ci && npm test; cd website-react && npm ci && npm run build. Browser interaction checks remain to be verified.
+Phase 7 branch: feat/enterprise-enforcement. Verify exact-head CI and required reviews. Next: durable approval/audit design, browser interaction evidence and release review. Reproduce: npm ci && npm test; node examples/enterprise/demo.mjs; cd website-react && npm ci && npm run build.

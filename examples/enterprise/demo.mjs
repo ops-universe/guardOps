@@ -1,0 +1,10 @@
+import {createSyntheticEnterprise} from './scenarios.mjs';
+const {gateway,approvalLedger,audit}=createSyntheticEnterprise();
+const actor={id:'synthetic-agent',role:'support'},request={tool:'issueRefund',args:{id:'ACCOUNT1',amount:25}};
+console.log('Synthetic demonstration only; no real system calls.');
+console.log(await gateway.execute(actor,request));
+const approval=approvalLedger.requestApproval(actor,request);
+approvalLedger.review(approval.id,'synthetic-human',true);
+console.log(await gateway.execute(actor,request,approval.id));
+console.log(await gateway.execute(actor,request,approval.id));
+console.log(audit.snapshot());
