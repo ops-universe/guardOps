@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Record merged PR #8 engineering acceptance: 60 core tests, four Chromium scenarios including scoped axe checks, and dependency audits passed in run 45522171890. Main verification tracked separately.
+
 - Align Vite preview base with production build; verify served JavaScript MIME and retain browser startup diagnostics without relaxing acceptance assertions.
 
 - Recheck reviewer authorization at consumption; isolate persistent configuration and test lock failure paths.

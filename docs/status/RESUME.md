@@ -1,5 +1,9 @@
 # Resume checkpoint
 
-Last verified main: 32b712c89450a2976b34df8919c20cfc6ac10b89
+Last verified main: e285a5a7bada141db2bdd58935398798a3368a1b (PR #8 squash merge).
 
-PR #8: browser startup failure in run 45521321049. Preview now uses the same /guardOps/ base as the build; verify exact-head browser, accessibility, core tests and audit. Inspect retained startup diagnostics if failure persists. Merge only when all gates pass. Public release deferred.
+PR #8 run 45522171890 passed all six reported exact-head checks; 60 core tests and 4 Chromium scenarios passed, dependency audits clean. Previous browser initialization failure resolved. Verify post-merge main CI and this documentation PR before declaring engineering acceptance closed. No remaining known failing functional test at the verified PR revision.
+
+Reproduce: npm ci && npm test && npm audit --audit-level=high; cd website-react && npm ci && npm audit --audit-level=high && VITE_BASE_PATH=/guardOps/ npm run build. Browser acceptance follows the pinned harness workflow in .github/workflows/ci.yml.
+
+Retain trusted-host and private local storage limitations. Developer Preview and public release deferred.
