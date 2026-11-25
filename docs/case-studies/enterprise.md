@@ -1,0 +1,5 @@
+# Synthetic enterprise integrations
+
+Customer support: account lookup is low risk; refunds are high risk and require a distinct trusted reviewer. Procurement: supplier reads are low risk, supplier approval requires review and supplier deletion is denied even with an allow rule. The demo uses in-memory synthetic handlers only. No production systems, customers or outcomes are claimed.
+
+Run `node examples/enterprise/demo.mjs`. The gateway validates arguments and policy, consumes scope-bound approval when necessary, records decision evidence before execution and validates returned output. Audit capacity failure blocks execution. Handler exceptions and invalid output do not imply rollback; the handler may already have performed a side effect. Host responsibility: trusted authenticated principals and reviewer identity, policy and schema consistency, bounded/idempotent handlers, transactions where required, external access controls and durable audit. The approval ledger supplied to the gateway must be constructed from the same policy/schema revision by the trusted host; the demo does so. This is not a sandbox or arbitrary code execution service.
