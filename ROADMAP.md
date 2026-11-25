@@ -1,6 +1,7 @@
 # Roadmap
 
 - Phases 1–7: initial milestones merged (PRs #1–6).
-- Durable approval and audit hardening proposed; CI pending.
+- Durable approval and audit hardening: PR #7; syntax fix proposed; exact-head tests and audit required.
 - Browser interaction and accessibility verification pending.
-- Phase 8: release security review, website and deployment verification pending.
+- Further security hardening and engineering verification pending.
+- Public release, Developer Preview designation, deployment and promotional website work deferred by owner.
