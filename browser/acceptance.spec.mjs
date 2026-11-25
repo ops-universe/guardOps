@@ -1,7 +1,23 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 const url=process.env.GUARDOPS_TEST_URL||'http://127.0.0.1:4173/guardOps/';
-test.beforeEach(async({page})=>{await page.goto(url);await expect(page.getByRole('heading',{name:'Policy workbench'})).toBeVisible();});
+test.beforeEach(async({page},info)=>{
+ const diagnostics=[];
+ page.on('pageerror',e=>diagnostics.push('pageerror: '+e.message));
+ page.on('console',m=>{if(m.type()==='error')diagnostics.push('console: '+m.text());});
+ page.on('requestfailed',r=>diagnostics.push('requestfailed: '+r.url()+' '+r.failure()?.errorText));
+ page.on('response',r=>{if(r.status()>=400)diagnostics.push('HTTP '+r.status()+' '+r.url());});
+ try{
+  const response=await page.goto(url);
+  expect(response?.ok()).toBe(true);
+  expect(new URL(page.url()).pathname).toBe(new URL(url).pathname);
+  await expect(page.getByRole('heading',{name:'Policy workbench'})).toBeVisible();
+  expect(diagnostics).toEqual([]);
+ }finally{
+  await info.attach('startup-diagnostics',{body:JSON.stringify({url:page.url(),title:await page.title(),headings:await page.getByRole('heading').allTextContents(),errors:diagnostics},null,2),contentType:'application/json'});
+  if(diagnostics.length)console.error(diagnostics.join('\n'));
+ }
+});
 test('real policy decisions, invalid input and stale evidence',async({page})=>{
  const work=page.getByRole('region',{name:'Policy dashboard'});
  const evaluate=work.getByRole('button',{name:'Evaluate decision'});

@@ -62,7 +62,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run browser and accessibility acceptance
         run: |
-          npm --prefix website-react run preview -- --host 127.0.0.1 --port 4173 --strictPort > "$RUNNER_TEMP/guardops-preview.log" 2>&1 &
+          VITE_BASE_PATH=/guardOps/ npm --prefix website-react run preview -- --host 127.0.0.1 --port 4173 --strictPort > "$RUNNER_TEMP/guardops-preview.log" 2>&1 &
           PID=$!
           trap 'kill "$PID" || true' EXIT
           for i in $(seq 1 30); do
@@ -70,6 +70,25 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/guardOps/ >/dev/null
+          curl --fail --silent http://127.0.0.1:4173/guardOps/ > "$RUNNER_TEMP/guardops-served.html"
+          grep -q '/guardOps/assets/' "$RUNNER_TEMP/guardops-served.html"
+          ASSET=$(grep -oE 'src="/guardOps/assets/[^"]+\.js"' "$RUNNER_TEMP/guardops-served.html" | head -1 | cut -d '"' -f2)
+          test -n "$ASSET"
+          curl --fail --silent --dump-header "$RUNNER_TEMP/guardops-asset.headers" "http://127.0.0.1:4173$ASSET" -o "$RUNNER_TEMP/guardops-asset.js"
+          grep -qiE 'content-type: (application|text)/javascript' "$RUNNER_TEMP/guardops-asset.headers"
           cp browser/acceptance.spec.mjs browser/playwright.config.mjs "$RUNNER_TEMP/guardops-browser-harness/"
           cd "$RUNNER_TEMP/guardops-browser-harness"
           GUARDOPS_TEST_URL=http://127.0.0.1:4173/guardOps/ npx playwright test --config playwright.config.mjs
+
+      - name: Retain browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guardops-browser-diagnostics
+          path: |
+            ${{ runner.temp }}/guardops-browser-harness/test-results
+            ${{ runner.temp }}/guardops-preview.log
+            ${{ runner.temp }}/guardops-served.html
+            ${{ runner.temp }}/guardops-asset.headers
+          if-no-files-found: warn
+          retention-days: 7
