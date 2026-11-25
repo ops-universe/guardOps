@@ -42,7 +42,7 @@ export function createApprovalLedger({policy,schemas,reviewerIds,clock=Date.now,
   function consume(id,principal,request){
     try{
       const n=time(),fingerprint=scope(principal,request),r=records.get(id);
-      if(!r||r.expiresAt<=n||r.status!=='approved'||r.scope!==fingerprint||decision(principal,request).decision!=='require-review')return deny('approval-invalid');
+      if(!r||r.expiresAt<=n||r.status!=='approved'||!reviewers.has(r.reviewer)||r.scope!==fingerprint||decision(principal,request).decision!=='require-review')return deny('approval-invalid');
       // Synchronous check-and-consume: no await before state transition.
       r.status='consumed';persist(); return {decision:'allow',reason:'approval-consumed',id,revision};
     }catch{return deny('consume-error');}

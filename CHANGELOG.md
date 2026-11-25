@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Align Vite preview base with production build; verify served JavaScript MIME and retain browser startup diagnostics without relaxing acceptance assertions.
+
+- Recheck reviewer authorization at consumption; isolate persistent configuration and test lock failure paths.
+- PR #7 merged after corrected CI: 56 tests passed, core audit clean.
+
 - Correct missing return in durable approval consumption; retain all security tests.
 
 - Add authenticated local snapshots, persistent approval consumption and durable audit; bind gateway to approval revision.
