@@ -37,3 +37,39 @@ jobs:
           test -f dist/index.html
           VITE_BASE_PATH=/guardOps/ npm run build
           grep -q '/guardOps/assets/' dist/index.html
+
+  browser-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+        working-directory: website-react
+      - run: VITE_BASE_PATH=/guardOps/ npm run build
+        working-directory: website-react
+      - name: Install pinned shared browser test harness
+        run: |
+          git clone https://github.com/ops-universe/ops-ui.git "$RUNNER_TEMP/guardops-browser-harness"
+          cd "$RUNNER_TEMP/guardops-browser-harness"
+          git checkout --detach 0fe0ecddb374d64badcafe897fef85f6a0eacf78
+          npm ci
+          npm audit --audit-level=high
+          npx playwright install --with-deps chromium
+      - name: Run browser and accessibility acceptance
+        run: |
+          npm --prefix website-react run preview -- --host 127.0.0.1 --port 4173 --strictPort > "$RUNNER_TEMP/guardops-preview.log" 2>&1 &
+          PID=$!
+          trap 'kill "$PID" || true' EXIT
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/guardOps/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/guardOps/ >/dev/null
+          cp browser/acceptance.spec.mjs browser/playwright.config.mjs "$RUNNER_TEMP/guardops-browser-harness/"
+          cd "$RUNNER_TEMP/guardops-browser-harness"
+          GUARDOPS_TEST_URL=http://127.0.0.1:4173/guardOps/ npx playwright test --config playwright.config.mjs
