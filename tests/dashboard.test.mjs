@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parsePolicy,simulateRequest,permissionMatrix,reviewDemo} from '../website-react/src/dashboard-model.mjs';import {readFileSync} from 'node:fs';
+const load=n=>JSON.parse(readFileSync(new URL('../examples/simulation/'+n+'.json',import.meta.url),'utf8'));const p=load('policy'),s=load('schemas');
+test('dashboard uses actual policy decisions',()=>{assert.equal(simulateRequest(p,s,'support','lookup','{"id":"SKU1"}').decision,'allow');assert.equal(simulateRequest(p,s,'support','refund','{"id":"SKU1"}').decision,'require-review');assert.equal(simulateRequest(p,s,'guest','lookup','{"id":"SKU1"}').decision,'deny');});
+test('invalid policy or args deny',()=>{assert.equal(parsePolicy('{'),null);assert.equal(parsePolicy('x'.repeat(65537)),null);assert.equal(simulateRequest(null,s,'support','lookup','{}').decision,'deny');assert.equal(simulateRequest(p,s,'support','lookup','{"id":"x","admin":true}').decision,'deny');});
+test('matrix reflects policy',()=>{assert.equal(permissionMatrix(p).find(x=>x.tool==='refund').decision,'require-review');assert.deepEqual(permissionMatrix(null),[]);});
+test('review demo terminal state is immutable by repeat actions',()=>{const a=reviewDemo({status:'pending'},'approve');assert.equal(a.status,'approved-demo');assert.deepEqual(reviewDemo(a,'reject'),a);});
+test('browser-compatible byte limits preserve UTF-8 semantics',()=>{assert.equal(simulateRequest(p,s,'support','lookup',JSON.stringify({id:'é'.repeat(40000)})).decision,'deny');});

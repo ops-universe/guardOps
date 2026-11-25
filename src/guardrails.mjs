@@ -1,4 +1,5 @@
 // Bounded JSON-data validation. Not a prompt-injection security boundary.
+const byteLength=value=>new TextEncoder().encode(value).length;
 const own=(o,k)=>Object.hasOwn(o,k);
 const record=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&[Object.prototype,null].includes(Object.getPrototypeOf(x));
 const names=['string','number','integer','boolean','null','object','array'];
@@ -10,18 +11,18 @@ export function boundedJson(value,{maxDepth=12,maxNodes=4096,maxBytes=65536}={})
     if(++nodes>maxNodes||depth>maxDepth)return false;
     if(v===null||typeof v==='boolean')return true;
     if(typeof v==='number')return Number.isFinite(v);
-    if(typeof v==='string'){bytes+=Buffer.byteLength(v);return bytes<=maxBytes;}
+    if(typeof v==='string'){bytes+=byteLength(v);return bytes<=maxBytes;}
     if(!Array.isArray(v)&&!record(v))return false;
     for(const k of Object.keys(v)){
       if(!safeKey(k))return false;
-      bytes+=Buffer.byteLength(k);if(bytes>maxBytes)return false;
+      bytes+=byteLength(k);if(bytes>maxBytes)return false;
       const d=Object.getOwnPropertyDescriptor(v,k);
       if(!d||!own(d,'value')||!visit(d.value,depth+1))return false;
     }
     if(Array.isArray(v)&&v.length!==Object.keys(v).length)return false;
     return true;
   }
-  try{return visit(value,0)&&Buffer.byteLength(JSON.stringify(value))<=maxBytes;}catch{return false;}
+  try{return visit(value,0)&&byteLength(JSON.stringify(value))<=maxBytes;}catch{return false;}
 }
 function validSchema(s,depth=0){
   if(depth>12||!exact(s,['type','properties','required','items','maxLength','maxItems','minimum','maximum','enum'])||!names.includes(s.type))return false;
@@ -69,7 +70,7 @@ export function inspectText(text,config={}){
     const enabled=own(config,'enabled')?config.enabled:Object.keys(detectors);
     const maxBytes=own(config,'maxBytes')?config.maxBytes:16384;
     if(!Array.isArray(enabled)||enabled.length>Object.keys(detectors).length||new Set(enabled).size!==enabled.length||!enabled.every(k=>typeof k==='string'&&own(detectors,k))||!Number.isSafeInteger(maxBytes)||maxBytes<1||maxBytes>65536)return fail('invalid-config');
-    if(typeof text!=='string'||Buffer.byteLength(text)>maxBytes)return fail('text-limit-or-invalid');
+    if(typeof text!=='string'||byteLength(text)>maxBytes)return fail('text-limit-or-invalid');
     return {valid:true,reason:'inspected',signals:enabled.filter(k=>detectors[k].test(text)).sort(),securityGuarantee:false};
   }catch{return fail('inspection-error');}
 }
