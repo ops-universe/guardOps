@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Re-verify Wave 1 on exact main 8dd15e35d4a9796fa3ba196521649877432b90a3: 60 core tests, four Chromium scenarios, clean configured audits and static Pages checks. No runtime changes or release.
+
 - Record successful post-merge implementation CI (45523320352) and documentation PR #9 CI (45523393322): 60 core tests, four Chromium scenarios, zero reported dependency vulnerabilities. Internal engineering acceptance, not independent security certification or public release.
 
 - Record merged PR #8 engineering acceptance: 60 core tests, four Chromium scenarios including scoped axe checks, and dependency audits passed in run 45522171890. Main verification tracked separately.
